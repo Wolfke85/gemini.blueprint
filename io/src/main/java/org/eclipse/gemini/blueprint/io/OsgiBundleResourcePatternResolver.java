@@ -33,9 +33,9 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.gemini.blueprint.io.internal.OsgiHeaderUtils;
 import org.eclipse.gemini.blueprint.io.internal.OsgiResourceUtils;
 import org.eclipse.gemini.blueprint.io.internal.OsgiUtils;
+import org.eclipse.gemini.blueprint.io.internal.resolver.BundleWiringResolver;
 import org.eclipse.gemini.blueprint.io.internal.resolver.DependencyResolver;
 import org.eclipse.gemini.blueprint.io.internal.resolver.ImportedBundle;
-import org.eclipse.gemini.blueprint.io.internal.resolver.PackageAdminResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -85,7 +85,6 @@ import org.springframework.util.StringUtils;
  * 
  * @author Costin Leau
  *
- * TODO: Rework to use WIRE Admin
  */
 public class OsgiBundleResourcePatternResolver extends PathMatchingResourcePatternResolver {
 
@@ -116,7 +115,6 @@ public class OsgiBundleResourcePatternResolver extends PathMatchingResourcePatte
 
 	private static final char DOT = '.';
 
-	// use the default package admin version
 	private final DependencyResolver resolver;
 
 	public OsgiBundleResourcePatternResolver(Bundle bundle) {
@@ -132,7 +130,7 @@ public class OsgiBundleResourcePatternResolver extends PathMatchingResourcePatte
 		}
 
 		this.bundleContext = (bundle != null ? OsgiUtils.getBundleContext(this.bundle) : null);
-		this.resolver = (bundleContext != null ? new PackageAdminResolver(bundleContext) : null);
+		this.resolver = (bundleContext != null ? new BundleWiringResolver(bundleContext) : null);
 	}
 
 	/**
@@ -181,6 +179,7 @@ public class OsgiBundleResourcePatternResolver extends PathMatchingResourcePatte
 	}
 
 	// add a non-existing resource, if none was found and no pattern was specified
+	@Override
 	public Resource[] getResources(final String locationPattern) throws IOException {
 
 		Resource[] resources = findResources(locationPattern);
@@ -207,12 +206,11 @@ public class OsgiBundleResourcePatternResolver extends PathMatchingResourcePatte
 	 * @param type
 	 * @return classpath resources
 	 */
-	@SuppressWarnings("unchecked")
 	private Resource[] findClassPathMatchingResources(String locationPattern, int type) throws IOException {
 
 		if (resolver == null)
 			throw new IllegalArgumentException(
-					"PackageAdmin service/a started bundle is required for classpath matching");
+					"BundleWiring service/a started bundle is required for classpath matching");
 
 		final ImportedBundle[] importedBundles = resolver.getImportedBundles(bundle);
 
@@ -230,6 +228,7 @@ public class OsgiBundleResourcePatternResolver extends PathMatchingResourcePatte
 			try {
 				AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 
+					@Override
 					public Object run() throws IOException {
 						for (int i = 0; i < importedBundles.length; i++) {
 							final ImportedBundle importedBundle = importedBundles[i];
@@ -276,7 +275,7 @@ public class OsgiBundleResourcePatternResolver extends PathMatchingResourcePatte
 			logger.trace("Fitered " + foundPaths + " to " + resources);
 		}
 
-		return (Resource[]) resources.toArray(new Resource[resources.size()]);
+		return resources.toArray(new Resource[resources.size()]);
 	}
 
 	private String determineFolderPattern(String path) {
@@ -289,7 +288,7 @@ public class OsgiBundleResourcePatternResolver extends PathMatchingResourcePatte
 		while (enm != null && enm.hasMoreElements()) {
 			resources.add(new UrlContextResource(enm.nextElement(), path));
 		}
-		return (ContextResource[]) resources.toArray(new ContextResource[resources.size()]);
+		return resources.toArray(new ContextResource[resources.size()]);
 	}
 
 	/**
@@ -300,7 +299,6 @@ public class OsgiBundleResourcePatternResolver extends PathMatchingResourcePatte
 	 * @param path path used for pattern matching
 	 * @param foundPaths collection of found results
 	 */
-	@SuppressWarnings("unchecked")
 	private void findImportedBundleMatchingResource(final ImportedBundle importedBundle, String rootPath, String path,
 			final Collection<String> foundPaths) throws IOException {
 
@@ -583,6 +581,7 @@ public class OsgiBundleResourcePatternResolver extends PathMatchingResourcePatte
 	 * Overrides the default check up since computing the URL can be fairly expensive operation as there is no caching
 	 * (due to the framework dynamic nature).
 	 */
+	@Override
 	protected boolean isJarResource(Resource resource) throws IOException {
 		if (resource instanceof OsgiBundleResource) {
 			// check the resource type

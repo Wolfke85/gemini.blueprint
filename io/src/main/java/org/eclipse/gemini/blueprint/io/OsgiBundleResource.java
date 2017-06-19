@@ -177,6 +177,7 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 	 * @see java.net.URLConnection#getInputStream()
 	 * 
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		URLConnection con = getURL().openConnection();
 		con.setUseCaches(false);
@@ -196,6 +197,7 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 	 * @see org.osgi.framework.Bundle#getEntry(String)
 	 * @see org.osgi.framework.Bundle#getResource(String)
 	 */
+	@Override
 	public URL getURL() throws IOException {
 		ContextResource res = null;
 		URL url = null;
@@ -297,6 +299,7 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 	 * @see org.springframework.util.StringUtils#applyRelativePath(String,
 	 *      String)
 	 */
+	@Override
 	public Resource createRelative(String relativePath) {
 		String pathToUse = StringUtils.applyRelativePath(this.path, relativePath);
 		return new OsgiBundleResource(this.bundle, pathToUse);
@@ -309,6 +312,7 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 	 * @return resource filename
 	 * @see org.springframework.util.StringUtils#getFilename(String)
 	 */
+	@Override
 	public String getFilename() {
 		return StringUtils.getFilename(this.path);
 	}
@@ -324,6 +328,7 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 	 * @throws IOException if the resource cannot be resolved as absolute file
 	 *         path, i.e. if the resource is not available in a file system
 	 */
+	@Override
 	public File getFile() throws IOException {
 		// locate the file inside the bundle only known prefixes
 		if (searchType != OsgiResourceUtils.PREFIX_TYPE_UNKNOWN) {
@@ -353,6 +358,7 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 	 * This implementation returns a description that includes the bundle
 	 * location.
 	 */
+	@Override
 	public String getDescription() {
 		StringBuilder buf = new StringBuilder();
 		buf.append("OSGi resource[");
@@ -370,6 +376,7 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 	 * <p/>
 	 * This implementation compares the underlying bundle and path locations.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) {
 			return true;
@@ -386,10 +393,12 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 	 * This implementation returns the hash code of the underlying class path
 	 * location.
 	 */
+	@Override
 	public int hashCode() {
 		return this.path.hashCode();
 	}
 
+	@Override
 	public long lastModified() throws IOException {
 		URLConnection con = getURL().openConnection();
 		con.setUseCaches(false);
@@ -419,7 +428,6 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 	 * @return an array of URLs
 	 * @throws IOException
 	 */
-	@SuppressWarnings("unchecked")
 	ContextResource[] getAllUrlsFromBundleSpace(String location) throws IOException {
 		if (bundle == null)
 			throw new IllegalArgumentException(
@@ -495,10 +503,11 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 			}
 		}
 
-		return (ContextResource[]) resources.toArray(new ContextResource[resources.size()]);
+		return resources.toArray(new ContextResource[resources.size()]);
 	}
 
 	// TODO: can this return null or throw an exception
+	@Override
 	public String getPathWithinContext() {
 		return pathWithoutPrefix;
 	}
@@ -515,6 +524,7 @@ public class OsgiBundleResource extends AbstractResource implements ContextResou
 	 * resource (overriding the default implementation which checks first for
 	 * the presence of a File).
 	 */
+	@Override
 	public boolean exists() {
 		try {
 			InputStream is = getInputStream();

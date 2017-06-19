@@ -15,16 +15,13 @@
 package org.eclipse.gemini.blueprint.io.internal.resolver;
 
 import org.osgi.framework.Bundle;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * Simple interface offering utility methods for OSGi dependencies, mainly
- * bundles. This class suplements the {@link PackageAdmin} service by offering
- * information on importing, not just exporting.
+ * bundles.
  * 
  * @author Costin Leau
  *
- * TODO: Rework to remove reference to PackageAdmin
  */
 public interface DependencyResolver {
 

@@ -14,17 +14,16 @@
 
 package org.eclipse.gemini.blueprint.iandt.extender.configuration;
 
+import java.util.List;
+import java.util.Properties;
+
 import org.eclipse.gemini.blueprint.iandt.BaseIntegrationTest;
 import org.eclipse.gemini.blueprint.util.OsgiStringUtils;
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
-import java.util.List;
-import java.util.Properties;
 
 /**
  * Extender configuration fragment.
@@ -36,14 +35,17 @@ public class ExtenderConfigurationTest extends BaseIntegrationTest {
 
 	private ApplicationContext context;
 
+	@Override
 	protected void onSetUp() throws Exception {
 		context = (ApplicationContext) applicationContext.getBean("appCtx");
 	}
 
+	@Override
 	protected String[] getTestBundlesNames() {
 		return new String[] { "org.eclipse.gemini.blueprint.iandt,extender-fragment-bundle," + getSpringDMVersion() };
 	}
 
+	@Override
 	protected String[] getConfigLocations() {
 		return new String[] { "org/eclipse/gemini/blueprint/iandt/extender/configuration/config.xml" };
 	}
@@ -55,13 +57,6 @@ public class ExtenderConfigurationTest extends BaseIntegrationTest {
 			System.out.println(OsgiStringUtils.nullSafeToString(refs[i]));
 		}
 		assertNotNull(context);
-	}
-
-	public void tstPackageAdminReferenceBean() throws Exception {
-		if (PackageAdmin.class.hashCode() != 0)
-			;
-		logger.info("Calling package admin bean");
-		assertNotNull(context.getBean("packageAdmin"));
 	}
 
 	public void testShutdownTaskExecutor() throws Exception {
@@ -83,10 +78,12 @@ public class ExtenderConfigurationTest extends BaseIntegrationTest {
 	}
 
 	// felix doesn't support fragments, so disable this test
+	@Override
 	protected boolean isDisabledInThisEnvironment(String testMethodName) {
 		return getPlatformName().indexOf("elix") > -1;
 	}
 
+	@Override
 	protected List getTestPermissions() {
 		List list = super.getTestPermissions();
 		list.add(new AdminPermission("*", AdminPermission.METADATA));

@@ -9,9 +9,6 @@
 		http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-	<osgi:reference id="packageAdmin"
-		interface="org.osgi.service.packageadmin.PackageAdmin" cardinality="0..1"/>
-
 	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor" p:threadGroupName="configured-extender"
 		  p:threadNamePrefix="conf-extender-thread" />
 
